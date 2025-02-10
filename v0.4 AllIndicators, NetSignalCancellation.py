@@ -10,7 +10,7 @@ class MultiIndicatorStrategy(QCAlgorithm):
 
         # Strategy parameters
         self.requiredSignals = 2          # Net signal threshold for triggering trades
-        self.triggerWindow = 12           # Number of bars within which signals must appear
+        self.triggerWindow = 10           # Number of bars within which signals must appear
         self.useNetSignalCancellation = True  # Toggle to use net signal cancellation logic
         
         # Volume indicator parameters

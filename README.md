@@ -4,8 +4,6 @@ A sophisticated multi-indicator strategy implementing adaptive trend following w
 
 <span style="color:red;"><strong>This template is for developing and backtesting strategies using multiple technical indicators. It is not intended for immediate live trading.</strong></span>
 
-Authors: Anton Reise, Leif Koesling
-
 ## Quick Start Guide
 
 1. **Choose a Version:**

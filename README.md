@@ -96,4 +96,4 @@ Developed by:
 - Anton Reise
 - Leif Koesling
 
-For questions, improvements, or collaboration, please contact the author.
+For questions, improvements, or collaboration, please contact the authors.

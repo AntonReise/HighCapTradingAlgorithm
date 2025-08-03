@@ -4,7 +4,7 @@ A sophisticated multi-indicator strategy implementing adaptive trend following w
 
 <span style="color:red;"><strong>This template is for developing and backtesting strategies using multiple technical indicators. It is not intended for immediate live trading.</strong></span>
 
-Authors: Anton Reise and Leif Koesling
+Authors: Anton Reise, Leif Koesling
 
 ## Quick Start Guide
 
@@ -98,6 +98,4 @@ Developed by:
 - Anton Reise
 - Leif Koesling
 
-For questions, improvements, or collaboration, please contact the authors.
-
-_Disclaimer: This algorithm is provided for educational and research purposes only. Past performance is not indicative of future results. Trade at your own risk._
+For questions, improvements, or collaboration, please contact the author.

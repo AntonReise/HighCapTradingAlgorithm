@@ -72,38 +72,38 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
         # Set dates and cash
         start_year, start_month, start_day = map(int, START_DATE.split("-"))
         end_year, end_month, end_day = map(int, END_DATE.split("-"))
-        self.SetStartDate(start_year, start_month, start_day)
-        self.SetEndDate(end_year, end_month, end_day)
-        self.SetCash(INITIAL_CASH)
+        self.set_start_date(start_year, start_month, start_day)
+        self.set_end_date(end_year, end_month, end_day)
+        self.set_cash(INITIAL_CASH)
         self.resolution = Resolution.Hour  # Hourly resolution
         
         # Set brokerage model to ensure trailing stop orders are supported
-        self.SetBrokerageModel(BrokerageName.QuantConnectBrokerage)
+        self.set_brokerage_model(BrokerageName.QuantConnectBrokerage)
         
-        self.SetWarmUp(50, self.resolution)
+        self.set_warm_up(50, self.resolution)
 
         # Initialize symbols and add equities
         self.symbols = []
         for ticker in SYMBOLS:
-            symbol = self.AddEquity(ticker, self.resolution).Symbol
+            symbol = self.add_equity(ticker, self.resolution).Symbol
             self.symbols.append(symbol)
 
         # Create dictionaries to hold per-symbol indicators
-        self.short_sma = {}
-        self.long_sma = {}
-        self.srsi = {}
-        self.macd = {}
-        self.mfi = {}
-        self.sma_vol = {}
+        self.short_sma_indicators = {}
+        self.long_sma_indicators = {}
+        self.srsi_indicators = {}
+        self.macd_indicators = {}
+        self.mfi_indicators = {}
+        self.sma_vol_indicators = {}
 
         # Initialize indicators for each symbol
         for symbol in self.symbols:
-            self.short_sma[symbol] = self.SMA(symbol, MA_FAST_PERIOD, self.resolution)
-            self.long_sma[symbol] = self.SMA(symbol, MA_SLOW_PERIOD, self.resolution)
-            self.srsi[symbol] = self.SRSI(symbol, STOCH_PERIOD, STOCH_PERIOD, STOCH_SMOOTH_K, STOCH_SMOOTH_D, self.resolution)
-            self.macd[symbol] = self.MACD(symbol, MACD_FAST, MACD_SLOW, MACD_SIGNAL, MovingAverageType.Simple, self.resolution)
-            self.mfi[symbol] = self.MFI(symbol, MFI_PERIOD)
-            self.sma_vol[symbol] = self.SMA(symbol, VOLUME_LOOKBACK, self.resolution, Field.Volume)
+            self.short_sma_indicators[symbol] = self.sma(symbol, MA_FAST_PERIOD, self.resolution)
+            self.long_sma_indicators[symbol] = self.sma(symbol, MA_SLOW_PERIOD, self.resolution)
+            self.srsi_indicators[symbol] = self.srsi(symbol, STOCH_PERIOD, STOCH_PERIOD, STOCH_SMOOTH_K, STOCH_SMOOTH_D, self.resolution)
+            self.macd_indicators[symbol] = self.macd(symbol, MACD_FAST, MACD_SLOW, MACD_SIGNAL, MovingAverageType.Simple, self.resolution)
+            self.mfi_indicators[symbol] = self.mfi(symbol, MFI_PERIOD)
+            self.sma_vol_indicators[symbol] = self.sma(symbol, VOLUME_LOOKBACK, self.resolution, Field.Volume)
 
         # Initialize per-symbol indicator signal lists
         self.ma_indicator_signals = {}
@@ -215,7 +215,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     ma_chart.add_series(Series("Sell Signal", SeriesType.SCATTER, "$", Color.RED, ScatterMarkerSymbol.TRIANGLE_DOWN))
                     ma_chart.add_series(Series("9 Period Value", SeriesType.LINE, "$", Color.ORANGE))
                     ma_chart.add_series(Series("20 Period Value", SeriesType.LINE, "$", Color.BLUE))
-                    self.AddChart(ma_chart)
+                    self.add_chart(ma_chart)
 
                 # STOCHRSI Chart
                 if ENABLE_STOCH_CHART:
@@ -224,7 +224,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     stochrsi_chart.add_series(Series("Sell Signal", SeriesType.SCATTER, "$", Color.RED, ScatterMarkerSymbol.TRIANGLE_DOWN))
                     stochrsi_chart.add_series(Series("K Value", SeriesType.LINE, "$", Color.BLUE))
                     stochrsi_chart.add_series(Series("D Value", SeriesType.LINE, "$", Color.ORANGE))
-                    self.AddChart(stochrsi_chart)
+                    self.add_chart(stochrsi_chart)
 
                 # LBROSC Chart
                 if ENABLE_LBR_CHART:
@@ -233,7 +233,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     lbrosc_chart.add_series(Series("Sell Signal", SeriesType.SCATTER, "$", Color.RED, ScatterMarkerSymbol.TRIANGLE_DOWN))
                     lbrosc_chart.add_series(Series("MACD Value", SeriesType.LINE, "$", Color.BLUE))
                     lbrosc_chart.add_series(Series("MACD Signal Value", SeriesType.LINE, "$", Color.ORANGE))
-                    self.AddChart(lbrosc_chart)
+                    self.add_chart(lbrosc_chart)
 
                 # MFI Chart
                 if ENABLE_MFI_CHART:
@@ -241,7 +241,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     mfi_chart.add_series(Series("Buy Signal", SeriesType.SCATTER, "$", Color.GREEN, ScatterMarkerSymbol.TRIANGLE))
                     mfi_chart.add_series(Series("Sell Signal", SeriesType.SCATTER, "$", Color.RED, ScatterMarkerSymbol.TRIANGLE_DOWN))
                     mfi_chart.add_series(Series("MFI Value", SeriesType.LINE, "$", Color.PURPLE))
-                    self.AddChart(mfi_chart)
+                    self.add_chart(mfi_chart)
 
                 # VOLUME Chart
                 if ENABLE_VOL_CHART:
@@ -250,7 +250,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     volume_chart.add_series(Series("Sell Signal", SeriesType.SCATTER, "$", Color.RED, ScatterMarkerSymbol.TRIANGLE_DOWN))
                     volume_chart.add_series(Series("Volume", SeriesType.BAR, "$", Color.BLUE))
                     volume_chart.add_series(Series("SMA Volume * Multiplier", SeriesType.LINE, "$", Color.RED))
-                    self.AddChart(volume_chart)
+                    self.add_chart(volume_chart)
 
                 # Trade Signals Chart
                 if ENABLE_TRADE_CHART:
@@ -259,7 +259,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     trade_chart.add_series(Series("Entry", SeriesType.SCATTER, "$", Color.GREEN, ScatterMarkerSymbol.TRIANGLE))
                     trade_chart.add_series(Series("Exit", SeriesType.SCATTER, "$", Color.RED, ScatterMarkerSymbol.TRIANGLE_DOWN))
                     trade_chart.add_series(Series("Trailing Stop", SeriesType.SCATTER, "$", Color.ORANGE, ScatterMarkerSymbol.CIRCLE))
-                    self.AddChart(trade_chart)
+                    self.add_chart(trade_chart)
 
     def OnData(self, data):
         # Process each symbol independently
@@ -270,7 +270,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
             bar = data.Bars[symbol]
             # Plot current price on trade signals chart for this symbol
             if ENABLE_CHARTING and ENABLE_TRADE_CHART:
-                self.Plot(f"{symbol.Value}_TradeSignals", "Price", bar.Close)
+                self.plot(f"{symbol.Value}_TradeSignals", "Price", bar.Close)
 
             if ENABLE_MA:
                 self.check_moving_average_crossovers(symbol, bar)
@@ -283,121 +283,121 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
             if ENABLE_VOL:
                 self.check_volume_spikes(symbol, bar)
 
-            if not self.IsWarmingUp:
+            if not self.is_warming_up:
                 net_signal = self.calculate_net_signal_value(symbol)
                 
                 # BUY SIGNAL
                 if net_signal >= REQUIRED_ENTRY_SIGNALS:
                     # If currently short, liquidate first
-                    if self.Portfolio[symbol].Quantity < 0:
-                        self.Liquidate(symbol)
+                    if self.portfolio[symbol].quantity < 0:
+                        self.liquidate(symbol)
                         # Cancel any existing trailing stop order
                         if self._TrailingStopOrderTicket[symbol] is not None:
                             self._TrailingStopOrderTicket[symbol].cancel("canceled TrailingStopOrder")
                         # Enter a long position at initial allocation
-                        self.SetHoldings(symbol, FIRST_TRADE_ALLOCATION)
-                        self.Debug(f"Liquidated short position and entered long on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
+                        self.set_holdings(symbol, FIRST_TRADE_ALLOCATION)
+                        self.debug(f"Liquidated short position and entered long on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
                         # Set trailing stop for long position
                         if ENABLE_TRAILING_STOPS:
-                            self._TrailingStopOrderTicket[symbol] = self.TrailingStopOrder(symbol, -self.Portfolio[symbol].Quantity, TRAILING_STOP_PERCENT, True)
+                            self._TrailingStopOrderTicket[symbol] = self.trailing_stop_order(symbol, -self.portfolio[symbol].quantity, TRAILING_STOP_PERCENT, True)
                     else:
                         # If not invested, go long with initial allocation
-                        if not self.Portfolio[symbol].Invested:
-                            self.SetHoldings(symbol, FIRST_TRADE_ALLOCATION)
-                            self.Debug(f"Entered long trade on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
+                        if not self.portfolio[symbol].invested:
+                            self.set_holdings(symbol, FIRST_TRADE_ALLOCATION)
+                            self.debug(f"Entered long trade on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
                             # Set trailing stop for long position
                             if ENABLE_TRAILING_STOPS:
-                                self._TrailingStopOrderTicket[symbol] = self.TrailingStopOrder(symbol, -self.Portfolio[symbol].Quantity, TRAILING_STOP_PERCENT, True)
+                                self._TrailingStopOrderTicket[symbol] = self.trailing_stop_order(symbol, -self.portfolio[symbol].quantity, TRAILING_STOP_PERCENT, True)
                         else:
                             # If already long, increase position by additional allocation
-                            current_weight = self.Portfolio[symbol].HoldingsValue / self.Portfolio.TotalPortfolioValue
+                            current_weight = self.portfolio[symbol].holdings_value / self.portfolio.total_portfolio_value
                             new_target = min(current_weight + REPEAT_TRADE_ALLOCATION, 1.0)
-                            self.SetHoldings(symbol, new_target)
-                            self.Debug(f"Increased long position on {symbol} to {new_target:.2f} for Net Signal {net_signal}. Active signals: {self.active_signals}")
+                            self.set_holdings(symbol, new_target)
+                            self.debug(f"Increased long position on {symbol} to {new_target:.2f} for Net Signal {net_signal}. Active signals: {self.active_signals}")
                     
                     # Update trade information
-                    if self.current_trades[symbol] is None or self.Portfolio[symbol].Quantity > 0:
+                    if self.current_trades[symbol] is None or self.portfolio[symbol].quantity > 0:
                         combo_key = ", ".join(sorted(self.active_signals)) if self.active_signals else "NO_SIGNAL"
                         self.current_trades[symbol] = {
-                            "entry_time": self.Time,
-                            "entry_price": self.Securities[symbol].Price,
-                            "quantity": self.Portfolio[symbol].Quantity,
+                            "entry_time": self.time,
+                            "entry_price": self.securities[symbol].price,
+                            "quantity": self.portfolio[symbol].quantity,
                             "active_signals": combo_key
                         }
                 
                 # SELL SIGNAL
                 elif net_signal <= -REQUIRED_EXIT_SIGNALS:
                     # If currently long, liquidate first
-                    if self.Portfolio[symbol].Quantity > 0:
-                        self.Liquidate(symbol)
+                    if self.portfolio[symbol].quantity > 0:
+                        self.liquidate(symbol)
                         # Cancel any existing trailing stop order
                         if self._TrailingStopOrderTicket[symbol] is not None:
                             self._TrailingStopOrderTicket[symbol].cancel("canceled TrailingStopOrder")
                         # Enter a short position at initial allocation
-                        self.SetHoldings(symbol, -FIRST_TRADE_ALLOCATION)
-                        self.Debug(f"Liquidated long position and entered short on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
+                        self.set_holdings(symbol, -FIRST_TRADE_ALLOCATION)
+                        self.debug(f"Liquidated long position and entered short on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
                         # Set trailing stop for short position
                         if ENABLE_TRAILING_STOPS:
-                            self._TrailingStopOrderTicket[symbol] = self.TrailingStopOrder(symbol, -self.Portfolio[symbol].Quantity, TRAILING_STOP_PERCENT, True)
+                            self._TrailingStopOrderTicket[symbol] = self.trailing_stop_order(symbol, -self.portfolio[symbol].quantity, TRAILING_STOP_PERCENT, True)
                     else:
                         # If not invested, go short with initial allocation
-                        if not self.Portfolio[symbol].Invested:
-                            self.SetHoldings(symbol, -FIRST_TRADE_ALLOCATION)
-                            self.Debug(f"Entered short trade on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
+                        if not self.portfolio[symbol].invested:
+                            self.set_holdings(symbol, -FIRST_TRADE_ALLOCATION)
+                            self.debug(f"Entered short trade on {symbol} for Net Signal {net_signal}. Active signals: {self.active_signals}")
                             # Set trailing stop for short position
                             if ENABLE_TRAILING_STOPS:
-                                self._TrailingStopOrderTicket[symbol] = self.TrailingStopOrder(symbol, -self.Portfolio[symbol].Quantity, TRAILING_STOP_PERCENT, True)
+                                self._TrailingStopOrderTicket[symbol] = self.trailing_stop_order(symbol, -self.portfolio[symbol].quantity, TRAILING_STOP_PERCENT, True)
                         else:
                             # If already short, increase short position by additional allocation
-                            current_weight = self.Portfolio[symbol].HoldingsValue / self.Portfolio.TotalPortfolioValue
+                            current_weight = self.portfolio[symbol].holdings_value / self.portfolio.total_portfolio_value
                             new_target = max(current_weight - REPEAT_TRADE_ALLOCATION, -1.0)
-                            self.SetHoldings(symbol, new_target)
-                            self.Debug(f"Increased short position on {symbol} to {new_target:.2f} for Net Signal {net_signal}. Active signals: {self.active_signals}")
+                            self.set_holdings(symbol, new_target)
+                            self.debug(f"Increased short position on {symbol} to {new_target:.2f} for Net Signal {net_signal}. Active signals: {self.active_signals}")
                     
                     
                     # Update trade information
-                    if self.current_trades[symbol] is None or self.Portfolio[symbol].Quantity < 0:
+                    if self.current_trades[symbol] is None or self.portfolio[symbol].quantity < 0:
                         combo_key = ", ".join(sorted(self.active_signals)) if self.active_signals else "NO_SIGNAL"
                         self.current_trades[symbol] = {
-                            "entry_time": self.Time,
-                            "entry_price": self.Securities[symbol].Price,
-                            "quantity": self.Portfolio[symbol].Quantity,
+                            "entry_time": self.time,
+                            "entry_price": self.securities[symbol].price,
+                            "quantity": self.portfolio[symbol].quantity,
                             "active_signals": combo_key
                         }
 
     def check_moving_average_crossovers(self, symbol, bar):
         # Update rolling windows for MA values
-        self.ma9_window[symbol].add(self.short_sma[symbol].Current.Value)
-        self.ma20_window[symbol].add(self.long_sma[symbol].Current.Value)
+        self.ma9_window[symbol].add(self.short_sma_indicators[symbol].Current.Value)
+        self.ma20_window[symbol].add(self.long_sma_indicators[symbol].Current.Value)
 
-        self.ma9_values[symbol].append(self.short_sma[symbol].Current.Value)
+        self.ma9_values[symbol].append(self.short_sma_indicators[symbol].Current.Value)
         if ENABLE_CHARTING and ENABLE_MA_CHART:
-            self.Plot(f"{symbol.Value}_MA", "9 Period Value", self.short_sma[symbol].Current.Value)
-        self.ma20_values[symbol].append(self.long_sma[symbol].Current.Value)
+            self.plot(f"{symbol.Value}_MA", "9 Period Value", self.short_sma_indicators[symbol].Current.Value)
+        self.ma20_values[symbol].append(self.long_sma_indicators[symbol].Current.Value)
         if ENABLE_CHARTING and ENABLE_MA_CHART:
-            self.Plot(f"{symbol.Value}_MA", "20 Period Value", self.long_sma[symbol].Current.Value)
+            self.plot(f"{symbol.Value}_MA", "20 Period Value", self.long_sma_indicators[symbol].Current.Value)
 
         if self.ma9_window[symbol][0] > self.ma20_window[symbol][0] and self.ma9_window[symbol][1] < self.ma20_window[symbol][1]:
             self.ma_indicator_signals[symbol].append("BUY")
             if ENABLE_CHARTING and ENABLE_MA_CHART:
-                self.Plot(f"{symbol.Value}_MA", "Buy Signal", self.short_sma[symbol].Current.Value)
+                self.plot(f"{symbol.Value}_MA", "Buy Signal", self.short_sma_indicators[symbol].Current.Value)
         elif self.ma9_window[symbol][0] < self.ma20_window[symbol][0] and self.ma9_window[symbol][1] > self.ma20_window[symbol][1]:
             self.ma_indicator_signals[symbol].append("SELL")
             if ENABLE_CHARTING and ENABLE_MA_CHART:
-                self.Plot(f"{symbol.Value}_MA", "Sell Signal", self.short_sma[symbol].Current.Value)
+                self.plot(f"{symbol.Value}_MA", "Sell Signal", self.short_sma_indicators[symbol].Current.Value)
         else:
             self.ma_indicator_signals[symbol].append(None)
 
     def check_stochrsi_crossovers(self, symbol, bar):
-        self.stoch_k_window[symbol].add(self.srsi[symbol].K.Current.Value)
-        self.stoch_d_window[symbol].add(self.srsi[symbol].D.Current.Value)
+        self.stoch_k_window[symbol].add(self.srsi_indicators[symbol].K.Current.Value)
+        self.stoch_d_window[symbol].add(self.srsi_indicators[symbol].D.Current.Value)
 
-        self.stoch_k_values[symbol].append(self.srsi[symbol].K.Current.Value)
+        self.stoch_k_values[symbol].append(self.srsi_indicators[symbol].K.Current.Value)
         if ENABLE_CHARTING and ENABLE_STOCH_CHART:
-            self.Plot(f"{symbol.Value}_STOCHRSI", "K Value", self.srsi[symbol].K.Current.Value)
-        self.stoch_d_values[symbol].append(self.srsi[symbol].D.Current.Value)
+            self.plot(f"{symbol.Value}_STOCHRSI", "K Value", self.srsi_indicators[symbol].K.Current.Value)
+        self.stoch_d_values[symbol].append(self.srsi_indicators[symbol].D.Current.Value)
         if ENABLE_CHARTING and ENABLE_STOCH_CHART:
-            self.Plot(f"{symbol.Value}_STOCHRSI", "D Value", self.srsi[symbol].D.Current.Value)
+            self.plot(f"{symbol.Value}_STOCHRSI", "D Value", self.srsi_indicators[symbol].D.Current.Value)
 
         k_buy = k_sell = d_buy = d_sell = False
 
@@ -422,58 +422,58 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
         if d_buy and True in self.stoch_k_cross_window[symbol]:
             self.stoch_indicator_signals[symbol].append("BUY")
             if ENABLE_CHARTING and ENABLE_STOCH_CHART:
-                self.Plot(f"{symbol.Value}_STOCHRSI", "Buy Signal", self.srsi[symbol].D.Current.Value)
+                self.plot(f"{symbol.Value}_STOCHRSI", "Buy Signal", self.srsi_indicators[symbol].D.Current.Value)
         elif d_sell and True in self.stoch_k_cross_window[symbol]:
             self.stoch_indicator_signals[symbol].append("SELL")
             if ENABLE_CHARTING and ENABLE_STOCH_CHART:
-                self.Plot(f"{symbol.Value}_STOCHRSI", "Sell Signal", self.srsi[symbol].D.Current.Value)
+                self.plot(f"{symbol.Value}_STOCHRSI", "Sell Signal", self.srsi_indicators[symbol].D.Current.Value)
         elif k_buy and True in self.stoch_k_cross_window[symbol]:
             self.stoch_indicator_signals[symbol].append("BUY")
             if ENABLE_CHARTING and ENABLE_STOCH_CHART:
-                self.Plot(f"{symbol.Value}_STOCHRSI", "Buy Signal", self.srsi[symbol].K.Current.Value)
+                self.plot(f"{symbol.Value}_STOCHRSI", "Buy Signal", self.srsi_indicators[symbol].K.Current.Value)
         elif k_sell and True in self.stoch_k_cross_window[symbol]:
             self.stoch_indicator_signals[symbol].append("SELL")
             if ENABLE_CHARTING and ENABLE_STOCH_CHART:
-                self.Plot(f"{symbol.Value}_STOCHRSI", "Sell Signal", self.srsi[symbol].K.Current.Value)
+                self.plot(f"{symbol.Value}_STOCHRSI", "Sell Signal", self.srsi_indicators[symbol].K.Current.Value)
         else:
             self.stoch_indicator_signals[symbol].append(None)
 
     def check_lbr_crossovers(self, symbol, bar):
-        self.lbr_window[symbol].add(self.macd[symbol].Current.Value)
-        self.lbr_signal_window[symbol].add(self.macd[symbol].Signal.Current.Value)
+        self.lbr_window[symbol].add(self.macd_indicators[symbol].Current.Value)
+        self.lbr_signal_window[symbol].add(self.macd_indicators[symbol].Signal.Current.Value)
 
-        self.lbr_values[symbol].append(self.macd[symbol].Current.Value)
+        self.lbr_values[symbol].append(self.macd_indicators[symbol].Current.Value)
         if ENABLE_CHARTING and ENABLE_LBR_CHART:
-            self.Plot(f"{symbol.Value}_LBROSC", "MACD Value", self.macd[symbol].Current.Value)
-        self.lbr_signal_values[symbol].append(self.macd[symbol].Signal.Current.Value)
+            self.plot(f"{symbol.Value}_LBROSC", "MACD Value", self.macd_indicators[symbol].Current.Value)
+        self.lbr_signal_values[symbol].append(self.macd_indicators[symbol].Signal.Current.Value)
         if ENABLE_CHARTING and ENABLE_LBR_CHART:
-            self.Plot(f"{symbol.Value}_LBROSC", "MACD Signal Value", self.macd[symbol].Signal.Current.Value)
+            self.plot(f"{symbol.Value}_LBROSC", "MACD Signal Value", self.macd_indicators[symbol].Signal.Current.Value)
 
         if self.lbr_window[symbol][0] > self.lbr_signal_window[symbol][0] and self.lbr_window[symbol][1] < self.lbr_signal_window[symbol][1]:
             self.lbr_indicator_signals[symbol].append("BUY")
             if ENABLE_CHARTING and ENABLE_LBR_CHART:
-                self.Plot(f"{symbol.Value}_LBROSC", "Buy Signal", self.macd[symbol].Signal.Current.Value)
+                self.plot(f"{symbol.Value}_LBROSC", "Buy Signal", self.macd_indicators[symbol].Signal.Current.Value)
         elif self.lbr_window[symbol][0] < self.lbr_signal_window[symbol][0] and self.lbr_window[symbol][1] > self.lbr_signal_window[symbol][1]:
             self.lbr_indicator_signals[symbol].append("SELL")
             if ENABLE_CHARTING and ENABLE_LBR_CHART:
-                self.Plot(f"{symbol.Value}_LBROSC", "Sell Signal", self.macd[symbol].Signal.Current.Value)
+                self.plot(f"{symbol.Value}_LBROSC", "Sell Signal", self.macd_indicators[symbol].Signal.Current.Value)
         else:
             self.lbr_indicator_signals[symbol].append(None)
 
     def check_mfi_crossovers(self, symbol, bar):
-        self.mfi_window[symbol].add(self.mfi[symbol].Current.Value)
-        self.mfi_values[symbol].append(self.mfi[symbol].Current.Value)
+        self.mfi_window[symbol].add(self.mfi_indicators[symbol].Current.Value)
+        self.mfi_values[symbol].append(self.mfi_indicators[symbol].Current.Value)
         if ENABLE_CHARTING and ENABLE_MFI_CHART:
-            self.Plot(f"{symbol.Value}_MFI", "MFI Value", self.mfi[symbol].Current.Value)
+            self.plot(f"{symbol.Value}_MFI", "MFI Value", self.mfi_indicators[symbol].Current.Value)
 
         if self.mfi_window[symbol][0] > 20 and self.mfi_window[symbol][1] < 20:
             self.mfi_indicator_signals[symbol].append("BUY")
             if ENABLE_CHARTING and ENABLE_MFI_CHART:
-                self.Plot(f"{symbol.Value}_MFI", "Buy Signal", self.mfi[symbol].Current.Value)
+                self.plot(f"{symbol.Value}_MFI", "Buy Signal", self.mfi_indicators[symbol].Current.Value)
         elif self.mfi_window[symbol][0] < 80 and self.mfi_window[symbol][1] > 80:
             self.mfi_indicator_signals[symbol].append("SELL")
             if ENABLE_CHARTING and ENABLE_MFI_CHART:
-                self.Plot(f"{symbol.Value}_MFI", "Sell Signal", self.mfi[symbol].Current.Value)
+                self.plot(f"{symbol.Value}_MFI", "Sell Signal", self.mfi_indicators[symbol].Current.Value)
         else:
             self.mfi_indicator_signals[symbol].append(None)
 
@@ -489,22 +489,22 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
 
         self.vol_values[symbol].append(bar.Volume)
         if ENABLE_CHARTING and ENABLE_VOL_CHART:
-            self.Plot(f"{symbol.Value}_VOLUME", "Volume", bar.Volume)
+            self.plot(f"{symbol.Value}_VOLUME", "Volume", bar.Volume)
 
-        self.vol_sma_values[symbol].append(self.sma_vol[symbol].Current.Value)
-        sma_vol_multiplier = self.sma_vol[symbol].Current.Value * VOLUME_SPIKE_MULTIPLIER
+        self.vol_sma_values[symbol].append(self.sma_vol_indicators[symbol].Current.Value)
+        sma_vol_multiplier = self.sma_vol_indicators[symbol].Current.Value * VOLUME_SPIKE_MULTIPLIER
         if ENABLE_CHARTING and ENABLE_VOL_CHART:
-            self.Plot(f"{symbol.Value}_VOLUME", "SMA Volume * Multiplier", sma_vol_multiplier)
+            self.plot(f"{symbol.Value}_VOLUME", "SMA Volume * Multiplier", sma_vol_multiplier)
 
-        if bar.Volume > VOLUME_SPIKE_MULTIPLIER * self.sma_vol[symbol].Current.Value:
+        if bar.Volume > VOLUME_SPIKE_MULTIPLIER * self.sma_vol_indicators[symbol].Current.Value:
             if price_change > 0:
                 self.vol_indicator_signals[symbol].append("BUY")
                 if ENABLE_CHARTING and ENABLE_VOL_CHART:
-                    self.Plot(f"{symbol.Value}_VOLUME", "Buy Signal", bar.Volume)
+                    self.plot(f"{symbol.Value}_VOLUME", "Buy Signal", bar.Volume)
             elif price_change < 0:
                 self.vol_indicator_signals[symbol].append("SELL")
                 if ENABLE_CHARTING and ENABLE_VOL_CHART:
-                    self.Plot(f"{symbol.Value}_VOLUME", "Sell Signal", bar.Volume)
+                    self.plot(f"{symbol.Value}_VOLUME", "Sell Signal", bar.Volume)
         else:
             self.vol_indicator_signals[symbol].append(None)
 
@@ -529,21 +529,21 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
         return net_signal
 
     def OnOrderEvent(self, orderEvent):
-        if orderEvent.Status != OrderStatus.Filled:
+        if orderEvent.Status != OrderStatus.FILLED:
             return
 
         symbol = orderEvent.Symbol
         # First, retrieve the complete order object
-        order = self.Transactions.GetOrderById(orderEvent.OrderId)
+        order = self.transactions.get_order_by_id(orderEvent.OrderId)
         
         # Check if this is a trailing stop order that got filled
-        is_trailing_stop = order.Type == OrderType.TrailingStop
+        is_trailing_stop = order.type == OrderType.TRAILING_STOP
         
-        if orderEvent.Direction == OrderDirection.Buy:
+        if orderEvent.Direction == OrderDirection.BUY:
             if self.current_trades[symbol] is None:
                 combo_key = ", ".join(sorted(self.active_signals)) if self.active_signals else "NO_SIGNAL"
                 self.current_trades[symbol] = {
-                    "entry_time": self.Time,
+                    "entry_time": self.time,
                     "entry_price": orderEvent.FillPrice,
                     "quantity": orderEvent.FillQuantity,
                     "active_signals": combo_key
@@ -552,19 +552,19 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
             # Plot the entry point with different marker for trailing stop entries
             if ENABLE_CHARTING and ENABLE_TRADE_CHART:
                 if is_trailing_stop:
-                    self.Plot(f"{symbol.Value}_TradeSignals", "Trailing Stop", orderEvent.FillPrice)
-                    self.Debug(f"Trailing stop buy triggered at {orderEvent.FillPrice} for {symbol}")
+                    self.plot(f"{symbol.Value}_TradeSignals", "Trailing Stop", orderEvent.FillPrice)
+                    self.debug(f"Trailing stop buy triggered at {orderEvent.FillPrice} for {symbol}")
                 else:
-                    self.Plot(f"{symbol.Value}_TradeSignals", "Entry", orderEvent.FillPrice)
+                    self.plot(f"{symbol.Value}_TradeSignals", "Entry", orderEvent.FillPrice)
                 
-        elif orderEvent.Direction == OrderDirection.Sell:
+        elif orderEvent.Direction == OrderDirection.SELL:
             # Plot the exit point with different marker for trailing stop exits
             if ENABLE_CHARTING and ENABLE_TRADE_CHART:
                 if is_trailing_stop:
-                    self.Plot(f"{symbol.Value}_TradeSignals", "Trailing Stop", orderEvent.FillPrice)
-                    self.Debug(f"Trailing stop sell triggered at {orderEvent.FillPrice} for {symbol}")
+                    self.plot(f"{symbol.Value}_TradeSignals", "Trailing Stop", orderEvent.FillPrice)
+                    self.debug(f"Trailing stop sell triggered at {orderEvent.FillPrice} for {symbol}")
                 else:
-                    self.Plot(f"{symbol.Value}_TradeSignals", "Exit", orderEvent.FillPrice)
+                    self.plot(f"{symbol.Value}_TradeSignals", "Exit", orderEvent.FillPrice)
                 
             if self.current_trades[symbol] is not None:
                 exit_price = orderEvent.FillPrice
@@ -594,7 +594,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                     stats["wins"] += 1
                 stats["total_return"] += trade_return
                 stats["total_pnl"] += pnl
-                duration = (self.Time - self.current_trades[symbol]["entry_time"]).total_seconds() / 3600.0
+                duration = (self.time - self.current_trades[symbol]["entry_time"]).total_seconds() / 3600.0
                 stats["total_duration"] += duration
                 stats["returns"].append(trade_return)
                 
@@ -612,7 +612,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
             if self._TrailingStopOrderTicket[symbol] is not None and self._TrailingStopOrderTicket[symbol].OrderId == orderEvent.OrderId:
                 self._TrailingStopOrderTicket[symbol] = None
 
-        self.Debug(f"Order filled for {symbol} at {orderEvent.FillPrice} as a {orderEvent.Direction} order. Order type: {order.Type}")
+        self.debug(f"Order filled for {symbol} at {orderEvent.FillPrice} as a {orderEvent.Direction} order. Order type: {order.type}")
 
     def OnEndOfAlgorithm(self):
         # Log final signal counts and trade stats for each symbol
@@ -620,7 +620,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
             for key, signals in self.indicator_signal_lists[symbol].items():
                 buy_count = signals.count("BUY")
                 sell_count = signals.count("SELL")
-                self.Debug(f"{symbol.Value} {key} signals - BUY: {buy_count}, SELL: {sell_count}")
+                self.debug(f"{symbol.Value} {key} signals - BUY: {buy_count}, SELL: {sell_count}")
             for combo, stats in self.trade_stats[symbol].items():
                 count = stats["count"]
                 if count > 0:
@@ -638,7 +638,7 @@ class HighCapMultiIndicatorStrategy(QCAlgorithm):
                 if count > 0 and "trailing_stop_exits" in stats:
                     trailing_stop_exit_pct = (stats["trailing_stop_exits"] / count) * 100
                     
-                self.Debug(f"{symbol.Value} Trade Stats for combination [{combo}] - Count: {count}, Win Rate: {win_rate:.2f}%, "
+                self.debug(f"{symbol.Value} Trade Stats for combination [{combo}] - Count: {count}, Win Rate: {win_rate:.2f}%, "
                            f"Avg % Return: {avg_return:.2f}%, Total PnL: {stats['total_pnl']:.2f}, "
                            f"Avg Duration (hrs): {avg_duration:.2f}, Max Return: {stats['max_return']}, "
                            f"Min Return: {stats['min_return']}, Std Dev: {std_dev:.2f}, "
